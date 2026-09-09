@@ -1,0 +1,1687 @@
+<title>Tank Life</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Libre+Franklin:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<style>
+:root{
+  --paper:#c5cdbf;
+  --paper-2:#b7c1af;
+  --ink:#1b2a24;
+  --ink-soft:#4a5d53;
+  --line:#a0ac97;
+  --dish-rim:#57644f;
+  --dish-glass-a:#5fa39b;
+  --dish-glass-b:#123834;
+  --dish-shadow: rgba(3,16,13,0.52);
+  --moss:#2f7a6e;
+  --glow: rgba(255,255,255,0.3);
+  --coral:#e2603a;
+  --teal:#1f8f80;
+  --amber:#c98a2d;
+  --violet:#7c5fae;
+  --food:#cfdd53;
+  --food-glow: rgba(207,221,83,0.4);
+  --btn-bg:#e6ebe0;
+  --btn-bg-hover:#d8e2d1;
+  --danger:#a8402b;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#090b06;
+    --paper-2:#11140c;
+    --ink:#dde6d8;
+    --ink-soft:#7c8577;
+    --line:#242a1b;
+    --dish-rim:#282f1e;
+    --dish-glass-a:#0d211f;
+    --dish-glass-b:#020807;
+    --dish-shadow: rgba(0,0,0,0.8);
+    --moss:#6fae9e;
+    --glow: rgba(120,255,225,0.22);
+    --coral:#ff9068;
+    --teal:#55e0cc;
+    --amber:#e0b452;
+    --violet:#ab93ea;
+    --food:#eef27e;
+    --food-glow: rgba(238,242,126,0.45);
+    --btn-bg:#131610;
+    --btn-bg-hover:#1a1e13;
+    --danger:#e0785f;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#090b06;
+  --paper-2:#11140c;
+  --ink:#dde6d8;
+  --ink-soft:#7c8577;
+  --line:#242a1b;
+  --dish-rim:#282f1e;
+  --dish-glass-a:#0d211f;
+  --dish-glass-b:#020807;
+  --dish-shadow: rgba(0,0,0,0.8);
+  --moss:#6fae9e;
+  --glow: rgba(120,255,225,0.22);
+  --coral:#ff9068;
+  --teal:#55e0cc;
+  --amber:#e0b452;
+  --violet:#ab93ea;
+  --food:#eef27e;
+  --food-glow: rgba(238,242,126,0.45);
+  --btn-bg:#131610;
+  --btn-bg-hover:#1a1e13;
+  --danger:#e0785f;
+}
+*{box-sizing:border-box;}
+body{
+  background:var(--paper);
+  color:var(--ink);
+  font-family:'Libre Franklin', system-ui, sans-serif;
+  padding:28px 20px 40px;
+  display:flex;
+  justify-content:center;
+}
+.wrap{
+  width:100%;
+  max-width:920px;
+}
+header{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-end;
+  gap:16px;
+  margin-bottom:18px;
+  flex-wrap:wrap;
+}
+.eyebrow{
+  font-family:'JetBrains Mono', monospace;
+  font-size:11px;
+  letter-spacing:0.14em;
+  text-transform:uppercase;
+  color:var(--ink-soft);
+  margin:0 0 6px;
+}
+h1{
+  font-family:'Fraunces', serif;
+  font-optical-sizing:auto;
+  font-weight:600;
+  font-size:clamp(28px,4vw,40px);
+  margin:0;
+  text-wrap:balance;
+  letter-spacing:-0.01em;
+}
+.tick-readout{
+  text-align:right;
+  font-family:'JetBrains Mono', monospace;
+  color:var(--ink-soft);
+  font-size:13px;
+  line-height:1.5;
+}
+.tick-readout b{
+  color:var(--ink);
+  font-size:15px;
+  font-variant-numeric:tabular-nums;
+}
+.controls{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-bottom:14px;
+}
+button{
+  font-family:'Libre Franklin', sans-serif;
+  font-weight:600;
+  font-size:13px;
+  border:1px solid var(--line);
+  background:var(--btn-bg);
+  color:var(--ink);
+  padding:8px 14px;
+  border-radius:8px;
+  cursor:pointer;
+  transition:background 0.15s ease, transform 0.1s ease;
+}
+button:hover{ background:var(--btn-bg-hover); }
+button:active{ transform:translateY(1px); }
+button:focus-visible{ outline:2px solid var(--moss); outline-offset:2px; }
+.seg{
+  display:inline-flex;
+  border:1px solid var(--line);
+  border-radius:8px;
+  overflow:hidden;
+}
+.seg button{
+  border:none;
+  border-radius:0;
+  border-right:1px solid var(--line);
+}
+.seg button:last-child{ border-right:none; }
+.seg button[aria-pressed="true"]{
+  background:var(--moss);
+  color:var(--paper);
+}
+.spacer{ flex:1; }
+.hint{
+  font-size:12.5px;
+  color:var(--ink-soft);
+}
+.dish-frame{
+  position:relative;
+  border-radius:14px;
+  padding:12px;
+  background:linear-gradient(155deg, var(--dish-rim), var(--line));
+  box-shadow: 0 18px 40px -18px var(--dish-shadow);
+  margin-bottom:16px;
+}
+.dish-inner{
+  position:relative;
+  border-radius:6px;
+  overflow:hidden;
+  border:1px solid var(--dish-rim);
+  background:
+    linear-gradient(180deg, var(--dish-glass-a) 0%, var(--dish-glass-b) 100%);
+}
+canvas{
+  display:block;
+  width:100%;
+  height:auto;
+  cursor:crosshair;
+  position:relative;
+  z-index:1;
+}
+.dish-inner::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background:linear-gradient(115deg, rgba(255,255,255,0.16) 0%, rgba(255,255,255,0.03) 18%, transparent 32%);
+}
+.dish-inner::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  box-shadow: inset 0 0 70px var(--dish-shadow);
+}
+.inspector{
+  position:absolute;
+  top:10px;
+  right:10px;
+  z-index:3;
+  width:152px;
+  background:var(--paper-2);
+  border:1px solid var(--line);
+  border-radius:10px;
+  padding:10px 11px;
+  box-shadow:0 10px 24px -10px rgba(0,0,0,0.4);
+}
+.inspector-close{
+  position:absolute;
+  top:4px;
+  right:6px;
+  border:none;
+  background:none;
+  padding:2px 5px;
+  font-size:14px;
+  line-height:1;
+  color:var(--ink-soft);
+}
+.inspector-close:hover{ color:var(--ink); background:none; }
+.inspector-top{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  margin-bottom:8px;
+  padding-right:14px;
+}
+.inspector-name-wrap{
+  display:flex;
+  flex-direction:column;
+  min-width:0;
+  line-height:1.25;
+}
+.inspector-name{
+  font-weight:600;
+  font-size:13px;
+}
+.inspector-perk{
+  font-family:'JetBrains Mono', monospace;
+  font-size:10px;
+  color:var(--ink-soft);
+}
+.inspector .card-row{ font-size:11px; }
+.end-overlay{
+  position:absolute;
+  inset:0;
+  z-index:2;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+  background:linear-gradient(180deg, rgba(4,10,8,0.45), rgba(4,10,8,0.68));
+}
+.end-overlay[hidden]{ display:none; }
+.end-card{
+  background:var(--paper-2);
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:26px 30px;
+  max-width:360px;
+  width:100%;
+  text-align:center;
+  box-shadow:0 24px 55px -18px rgba(0,0,0,0.5);
+}
+.end-eyebrow{
+  font-family:'JetBrains Mono', monospace;
+  font-size:11px;
+  letter-spacing:0.14em;
+  text-transform:uppercase;
+  color:var(--ink-soft);
+  margin:0 0 10px;
+}
+.end-headline{
+  font-family:'Fraunces', serif;
+  font-optical-sizing:auto;
+  font-weight:600;
+  font-size:26px;
+  margin:0 0 10px;
+  color:var(--ink);
+  text-wrap:balance;
+}
+.end-body{
+  font-size:13.5px;
+  line-height:1.55;
+  color:var(--ink-soft);
+  margin:0 0 18px;
+}
+.end-extinct-list{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  justify-content:center;
+  margin-bottom:22px;
+}
+.end-chip{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  font-family:'JetBrains Mono', monospace;
+  font-size:11px;
+  letter-spacing:0.02em;
+  padding:4px 10px 4px 8px;
+  border-radius:20px;
+  border:1px solid var(--line);
+  background:var(--paper);
+  color:var(--ink-soft);
+}
+.end-chip .dot{
+  width:7px; height:7px;
+  border-radius:50%;
+  flex:none;
+  opacity:0.55;
+}
+.end-history{
+  border-top:1px solid var(--line);
+  padding-top:14px;
+  margin-bottom:18px;
+  text-align:left;
+}
+.end-history-eyebrow{
+  font-family:'JetBrains Mono', monospace;
+  font-size:10.5px;
+  letter-spacing:0.12em;
+  text-transform:uppercase;
+  color:var(--ink-soft);
+  margin:0 0 8px;
+  text-align:center;
+}
+.hist-row{
+  display:grid;
+  grid-template-columns:88px 1fr 18px;
+  align-items:center;
+  gap:7px;
+  margin-bottom:5px;
+}
+.hist-label{
+  font-size:10.5px;
+  color:var(--ink-soft);
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.hist-bar{
+  height:6px;
+  border-radius:3px;
+  background:var(--paper);
+  overflow:hidden;
+}
+.hist-bar > i{
+  display:block;
+  height:100%;
+  border-radius:3px;
+  background:var(--moss);
+}
+.hist-count{
+  font-family:'JetBrains Mono', monospace;
+  font-size:11px;
+  text-align:right;
+  color:var(--ink);
+  font-variant-numeric:tabular-nums;
+}
+.end-restart-btn{
+  background:var(--moss);
+  border-color:var(--moss);
+  color:var(--paper);
+  font-size:14px;
+  padding:10px 22px;
+}
+.end-restart-btn:hover{ filter:brightness(1.08); background:var(--moss); }
+.legend{
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(190px,1fr));
+  gap:10px;
+  margin-bottom:8px;
+}
+.card{
+  border:1px solid var(--line);
+  background:var(--paper-2);
+  border-radius:12px;
+  padding:12px 14px;
+}
+.card-top{
+  display:flex;
+  align-items:center;
+  gap:9px;
+  margin-bottom:8px;
+}
+.swatch{
+  width:16px; height:16px;
+  border-radius:50%;
+  flex:none;
+  box-shadow: inset -2px -2px 3px rgba(0,0,0,0.18), inset 2px 2px 3px rgba(255,255,255,0.25);
+}
+.card-name-wrap{
+  display:flex;
+  flex-direction:column;
+  flex:1;
+  min-width:0;
+  line-height:1.25;
+}
+.card-name{
+  font-weight:600;
+  font-size:14.5px;
+}
+.card-perk{
+  font-family:'JetBrains Mono', monospace;
+  font-size:10.5px;
+  letter-spacing:0.02em;
+  color:var(--ink-soft);
+}
+.card-status{
+  font-family:'JetBrains Mono', monospace;
+  font-size:10px;
+  letter-spacing:0.06em;
+  text-transform:uppercase;
+  padding:2px 7px;
+  border-radius:5px;
+  color:var(--ink-soft);
+  background:var(--paper);
+  border:1px solid var(--line);
+}
+.card-row{
+  display:flex;
+  justify-content:space-between;
+  font-family:'JetBrains Mono', monospace;
+  font-size:12px;
+  color:var(--ink-soft);
+  margin-bottom:5px;
+}
+.card-row b{
+  color:var(--ink);
+  font-variant-numeric:tabular-nums;
+}
+.gauge{
+  height:5px;
+  border-radius:3px;
+  background:var(--line);
+  overflow:hidden;
+}
+.gauge > i{
+  display:block;
+  height:100%;
+  border-radius:3px;
+}
+footer{
+  text-align:center;
+  font-size:12px;
+  color:var(--ink-soft);
+  margin-top:6px;
+}
+</style>
+
+<div class="wrap">
+  <header>
+    <div>
+      <p class="eyebrow">A tank of four cell strains</p>
+      <h1>Tank Life</h1>
+    </div>
+    <div class="tick-readout">
+      cycle <b id="cycleReadout">0</b><br>
+      population <b id="popReadout">0</b>
+    </div>
+  </header>
+
+  <div class="controls">
+    <button id="playBtn" aria-pressed="false">Pause</button>
+    <div class="seg" role="group" aria-label="Simulation speed">
+      <button data-speed="1" aria-pressed="true">1&times;</button>
+      <button data-speed="2" aria-pressed="false">2&times;</button>
+      <button data-speed="4" aria-pressed="false">4&times;</button>
+    </div>
+    <button id="resetBtn">Start a new tank</button>
+    <button id="soundBtn" aria-pressed="true">Sound on</button>
+    <div class="spacer"></div>
+    <span class="hint">Click a cell to inspect it, or the water to drop plankton</span>
+  </div>
+
+  <div class="dish-frame">
+    <div class="dish-inner">
+      <canvas id="dish" width="880" height="520" aria-label="Aquarium cell-colony simulation"></canvas>
+      <div class="inspector" id="inspector" hidden>
+        <button class="inspector-close" id="inspectorClose" aria-label="Close inspector">&times;</button>
+        <div class="inspector-top">
+          <span class="swatch" id="inspSwatch"></span>
+          <span class="inspector-name-wrap">
+            <span class="inspector-name" id="inspName">&mdash;</span>
+            <span class="inspector-perk" id="inspPerk"></span>
+          </span>
+        </div>
+        <div class="card-row"><span>mode</span><b id="inspMode">&mdash;</b></div>
+        <div class="card-row"><span>energy</span><b id="inspEnergyText">&mdash;</b></div>
+        <div class="gauge"><i id="inspEnergyBar" style="background:var(--moss)"></i></div>
+        <div class="card-row" style="margin-top:6px"><span>size</span><b id="inspSizeText">&mdash;</b></div>
+        <div class="gauge"><i id="inspSizeBar"></i></div>
+      </div>
+      <div class="end-overlay" id="endOverlay" hidden>
+        <div class="end-card">
+          <p class="end-eyebrow" id="endEyebrow">cycle 0</p>
+          <h2 class="end-headline" id="endHeadline">&mdash;</h2>
+          <p class="end-body" id="endBody"></p>
+          <div class="end-extinct-list" id="endExtinctList"></div>
+          <div class="end-history">
+            <p class="end-history-eyebrow" id="endHistoryEyebrow">track record</p>
+            <div id="endHistoryList"></div>
+          </div>
+          <button class="end-restart-btn" id="endResetBtn">Start a new tank</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="legend" id="legend"></div>
+
+  <footer>Plankton feeds growth. A cell splits itself in two once it's grown large enough. The large will engulf the small of other strains when hungry. Plankton left uneaten too long throbs, then hatches into a cell of its own.</footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var canvas = document.getElementById('dish');
+  var ctx = canvas.getContext('2d');
+  var W = canvas.width, H = canvas.height;
+
+  function rand(a,b){ return a + Math.random()*(b-a); }
+  function dist2(ax,ay,bx,by){ var dx=ax-bx, dy=ay-by; return dx*dx+dy*dy; }
+
+  // --- sound: everything here is synthesized with the Web Audio API, no
+  // audio files — short enveloped tones for events, plus occasional soft
+  // "bubble" blips for ambience. Muted until the first click (browser
+  // autoplay rules), and stays off across resets if the viewer turned it off.
+  var Sound = (function(){
+    var MASTER_LEVEL = 0.9;
+    var ctx = null, master = null;
+    var enabled = true;
+    try { enabled = localStorage.getItem('tankLifeSound') !== 'off'; } catch(e){}
+    var lastEat = 0, lastSplit = 0, lastPredation = 0;
+    var bubbleTimer = null;
+
+    function init(){
+      if (ctx) return;
+      var AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return;
+      try {
+        ctx = new AC();
+        master = ctx.createGain();
+        master.gain.value = enabled ? MASTER_LEVEL : 0;
+        master.connect(ctx.destination);
+        scheduleBubble();
+      } catch(e){ ctx = null; master = null; }
+    }
+
+    // called from every click/tap in the page — browsers require a real
+    // user gesture before audio can play, so this keeps retrying until one
+    // actually unsuspends the context
+    function unlock(){
+      if (!ctx) init();
+      if (ctx && ctx.state !== 'running'){
+        ctx.resume().catch(function(){});
+      }
+    }
+
+    // a single enveloped tone; freqEnd lets it slide (a "gulp" or "chirp")
+    function tone(freq, dur, kind, peak, delay, freqEnd){
+      if (!ctx || !enabled) return;
+      var t0 = ctx.currentTime + (delay||0);
+      var osc = ctx.createOscillator();
+      var g = ctx.createGain();
+      osc.type = kind || 'sine';
+      osc.frequency.setValueAtTime(freq, t0);
+      if (freqEnd) osc.frequency.exponentialRampToValueAtTime(Math.max(30,freqEnd), t0+dur);
+      g.gain.setValueAtTime(0, t0);
+      g.gain.linearRampToValueAtTime(peak, t0+dur*0.18);
+      g.gain.exponentialRampToValueAtTime(0.0008, t0+dur);
+      osc.connect(g); g.connect(master);
+      osc.start(t0); osc.stop(t0+dur+0.02);
+    }
+
+    function scheduleBubble(){
+      if (bubbleTimer) clearTimeout(bubbleTimer);
+      bubbleTimer = setTimeout(function(){
+        if (ctx) tone(rand(180,260), 0.22, 'sine', 0.045, 0, rand(320,420));
+        scheduleBubble();
+      }, rand(1800,4200));
+    }
+
+    return {
+      unlock: unlock,
+      eat: function(){
+        var now = performance.now();
+        if (now-lastEat < 70) return;
+        lastEat = now;
+        tone(rand(650,850), 0.06, 'sine', 0.09);
+      },
+      predation: function(){
+        var now = performance.now();
+        if (now-lastPredation < 180) return;
+        lastPredation = now;
+        tone(rand(280,340), 0.14, 'triangle', 0.15, 0, 140);
+      },
+      split: function(){
+        var now = performance.now();
+        if (now-lastSplit < 140) return;
+        lastSplit = now;
+        tone(500, 0.05, 'sine', 0.1, 0);
+        tone(760, 0.06, 'sine', 0.1, 0.055);
+      },
+      hatch: function(){
+        tone(440, 0.09, 'sine', 0.09, 0);
+        tone(560, 0.09, 'sine', 0.09, 0.09);
+        tone(680, 0.11, 'sine', 0.09, 0.18);
+      },
+      gameOver: function(win){
+        if (win){
+          tone(392, 0.16, 'sine', 0.14, 0);
+          tone(494, 0.16, 'sine', 0.14, 0.14);
+          tone(587, 0.24, 'sine', 0.14, 0.28);
+        } else {
+          tone(330, 0.2, 'sine', 0.12, 0);
+          tone(262, 0.3, 'sine', 0.12, 0.18);
+        }
+      },
+      isEnabled: function(){ return enabled; },
+      setEnabled: function(v){
+        enabled = v;
+        if (master) master.gain.value = enabled ? MASTER_LEVEL : 0;
+        try { localStorage.setItem('tankLifeSound', enabled ? 'on' : 'off'); } catch(e){}
+      }
+    };
+  })();
+
+  // --- run history: outcomes persist in the browser across tanks. strain
+  // names/colors reshuffle every run, so history is keyed on the stable
+  // behavior role (fast breeder / all-rounder / apex predator / evader)
+  // rather than the generated name, so it actually says something over time
+  var History = (function(){
+    var STORAGE_KEY = 'tankLifeHistory';
+    var MAX_ENTRIES = 200;
+    var log = [];
+    try {
+      var saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+      if (Array.isArray(saved)) log = saved;
+    } catch(e){}
+
+    function save(){
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(log.slice(-MAX_ENTRIES))); } catch(e){}
+    }
+
+    return {
+      record: function(role, cycle){
+        log.push({ role: role, cycle: cycle });
+        save();
+      },
+      summary: function(){
+        var tallies = {}, wipeouts = 0;
+        SPECIES.forEach(function(s){ tallies[s.key] = 0; });
+        log.forEach(function(entry){
+          if (entry.role && tallies.hasOwnProperty(entry.role)) tallies[entry.role]++;
+          else wipeouts++;
+        });
+        return { tallies: tallies, wipeouts: wipeouts, total: log.length };
+      }
+    };
+  })();
+
+  function shuffle(arr){
+    for (var i=arr.length-1;i>0;i--){
+      var j = Math.floor(Math.random()*(i+1));
+      var tmp = arr[i]; arr[i]=arr[j]; arr[j]=tmp;
+    }
+    return arr;
+  }
+
+  // a pool of invented micro-critter names; 4 unique ones are drawn fresh
+  // every time a tank starts, decoupled from which behavior role they land on
+  var NAME_POOL = [
+    'Blips','Nubbins','Skitters','Wibbles','Florns','Quibs','Drovels','Snits',
+    'Ploots','Whisks','Zunks','Thrums','Vexlings','Corkles','Dabbers','Muckles',
+    'Grubbins','Tandrils','Fizzles','Murks','Wigglets','Snorbs','Plinkers','Dooblets',
+    'Yarnles','Crumlings','Bobbits','Sluvvers','Winklets','Gorpies','Tumbries','Fenlings',
+    'Squibs','Dinkles','Morfs','Plumbets'
+  ];
+
+  // the visual silhouette (tail / bulge / spiked hide / motion streak) is
+  // reassigned to a random behavior role each tank, so the look of "the fast
+  // breeder" or "the apex predator" is never the same strain twice running
+  var VISUAL_TRAITS = ['tail','bulge','spiked','streak'];
+
+  // a small perk each strain rolls on top of its base numbers, for extra
+  // run-to-run variance and something to show off in the legend
+  var PERKS = [
+    {name:'Efficient', apply:function(s){ s.metabolism *= 0.78; }},
+    {name:'Prolific', apply:function(s){ s.reproCost *= 0.72; s.reproCooldown *= 0.8; }},
+    {name:'Sharp-eyed', apply:function(s){ s.visionR *= 1.3; }},
+    {name:'Swift', apply:function(s){ s.speed *= 1.22; }},
+    {name:'Hardy', apply:function(s){ s.maxEnergy *= 1.22; }},
+    {name:'Voracious', apply:function(s){ s.foodValue *= 1.25; s.growthPerFood *= 1.15; }}
+  ];
+
+  function hslToHex(h, s, l){
+    s/=100; l/=100;
+    var cc=(1-Math.abs(2*l-1))*s;
+    var x=cc*(1-Math.abs((h/60)%2-1));
+    var m=l-cc/2, r=0,g=0,b=0;
+    if (h<60){ r=cc; g=x; } else if (h<120){ r=x; g=cc; }
+    else if (h<180){ g=cc; b=x; } else if (h<240){ g=x; b=cc; }
+    else if (h<300){ r=x; b=cc; } else { r=cc; b=x; }
+    var toHex = function(v){ return Math.round((v+m)*255).toString(16).padStart(2,'0'); };
+    return '#'+toHex(r)+toHex(g)+toHex(b);
+  }
+
+  // 4 hues spread around the wheel (with jitter) so strains are always easy
+  // to tell apart, at a saturation/lightness band that reads in both themes
+  function randomPalette(){
+    var baseHue = rand(0,360);
+    var hues = [0,90,180,270].map(function(off){ return (baseHue+off+rand(-20,20)+360)%360; });
+    shuffle(hues);
+    return hues.map(function(h){ return hslToHex(h, rand(52,88), rand(38,60)); });
+  }
+
+  // each strain keeps its behavior role (fast breeder, apex predator, etc.)
+  // but its exact numbers, name, color, visual silhouette and a bonus perk
+  // are all re-rolled independently every time a tank starts
+  var SPECIES = [
+    {
+      key:'breeder', roleLabel:'Fast breeder',
+      ranges:{ baseR:[5,7], maxR:[14,19], matureFrac:[0.52,0.66], speed:[1.0,3.0],
+        metabolism:[0.028,0.040], growthPerFood:[0.9,1.4], foodValue:[18,24],
+        maxEnergy:[90,115], energyFrac:[0.5,0.62], reproCost:[18,26], reproCooldown:[110,160],
+        visionR:[90,115], hungryFrac:[0.55,0.7], predatorRatio:[1.25,1.4], count:[4,6] }
+    },
+    {
+      key:'balanced', roleLabel:'All-rounder',
+      ranges:{ baseR:[7,9], maxR:[19,29], matureFrac:[0.52,0.64], speed:[0.6,2.3],
+        metabolism:[0.022,0.032], growthPerFood:[1.1,1.5], foodValue:[20,26],
+        maxEnergy:[110,140], energyFrac:[0.5,0.6], reproCost:[26,36], reproCooldown:[130,185],
+        visionR:[100,120], hungryFrac:[0.6,0.7], predatorRatio:[1.25,1.35], count:[4,6] }
+    },
+    {
+      key:'apex', roleLabel:'Apex predator',
+      ranges:{ baseR:[9,13], maxR:[23,30], matureFrac:[0.55,0.66], speed:[0.4,1.9],
+        metabolism:[0.030,0.042], growthPerFood:[1.4,1.8], foodValue:[24,30],
+        maxEnergy:[115,145], energyFrac:[0.5,0.58], reproCost:[34,46], reproCooldown:[175,230],
+        visionR:[75,95], hungryFrac:[0.5,0.6], predatorRatio:[1.45,1.65], count:[3,5] }
+    },
+    {
+      key:'evader', roleLabel:'Evader',
+      ranges:{ baseR:[4,6], maxR:[11,15], matureFrac:[0.52,0.64], speed:[1.5,3.8],
+        metabolism:[0.031,0.044], growthPerFood:[0.7,1.1], foodValue:[16,20],
+        maxEnergy:[75,95], energyFrac:[0.5,0.6], reproCost:[13,18], reproCooldown:[85,120],
+        visionR:[105,130], hungryFrac:[0.55,0.65], predatorRatio:[1.3,1.45], count:[4,6] }
+    }
+  ];
+
+  function rollRange(pair){ return rand(pair[0], pair[1]); }
+
+  // reshuffles the parts of each strain that are pure flavor: what it's
+  // called, what color it is, and which silhouette it wears
+  function assignFlavor(){
+    var names = shuffle(NAME_POOL.slice()).slice(0, SPECIES.length);
+    var colors = randomPalette();
+    var visuals = shuffle(VISUAL_TRAITS.slice());
+    SPECIES.forEach(function(spec, i){
+      spec.name = names[i];
+      spec.color = colors[i];
+      spec.visual = visuals[i];
+    });
+  }
+
+  function rollSpecies(spec){
+    var r = spec.ranges;
+    spec.baseR = rollRange(r.baseR);
+    spec.maxR = rollRange(r.maxR);
+    spec.matureR = spec.maxR * rollRange(r.matureFrac);
+    spec.predatorR = spec.matureR;
+    spec.speed = rollRange(r.speed);
+    spec.metabolism = rollRange(r.metabolism);
+    spec.growthPerFood = rollRange(r.growthPerFood);
+    spec.foodValue = rollRange(r.foodValue);
+    spec.maxEnergy = rollRange(r.maxEnergy);
+    spec.startEnergy = spec.maxEnergy * rollRange(r.energyFrac);
+    spec.reproCost = rollRange(r.reproCost);
+    spec.reproCooldown = rollRange(r.reproCooldown);
+    spec.visionR = rollRange(r.visionR);
+    spec.hungryFrac = rollRange(r.hungryFrac);
+    spec.predatorRatio = rollRange(r.predatorRatio);
+    spec.count = Math.round(rollRange(r.count));
+
+    var perk = PERKS[Math.floor(rand(0, PERKS.length))];
+    perk.apply(spec);
+    spec.perkName = perk.name;
+  }
+
+  var creatures = [];
+  var food = [];
+  var idSeq = 1;
+
+  // each visual silhouette gets a distinct membrane character, independent
+  // of which behavior role or color it's been shuffled onto this tank:
+  // bulge = loose amoeboid pseudopods, spiked = a stiffer craggy hide,
+  // streak = a tight taut skin, tail = smooth and simple
+  function makeMembrane(spec){
+    if (spec.visual==='bulge'){
+      return [
+        {f:rand(0.9,1.3), p:rand(0,6.28), a:rand(0.13,0.19)},
+        {f:rand(2.0,2.6), p:rand(0,6.28), a:rand(0.05,0.08)},
+        {f:rand(3.4,4.2), p:rand(0,6.28), a:rand(0.03,0.05)}
+      ];
+    }
+    if (spec.visual==='spiked'){
+      return [
+        {f:rand(2.4,3.0), p:rand(0,6.28), a:rand(0.045,0.07)},
+        {f:rand(4.8,5.6), p:rand(0,6.28), a:rand(0.025,0.04)},
+        {f:rand(1.3,1.7), p:rand(0,6.28), a:rand(0.035,0.05)}
+      ];
+    }
+    if (spec.visual==='streak'){
+      return [
+        {f:rand(2.6,3.2), p:rand(0,6.28), a:rand(0.04,0.06)},
+        {f:rand(4.0,4.8), p:rand(0,6.28), a:rand(0.02,0.035)},
+        {f:rand(1.6,2.0), p:rand(0,6.28), a:rand(0.025,0.04)}
+      ];
+    }
+    return [
+      {f:rand(2.1,2.6), p:rand(0,6.28), a:rand(0.03,0.05)},
+      {f:rand(3.4,4.0), p:rand(0,6.28), a:rand(0.02,0.035)},
+      {f:rand(1.3,1.7), p:rand(0,6.28), a:rand(0.025,0.04)}
+    ];
+  }
+
+  function spawnCreature(spec, x, y, energy, radius){
+    creatures.push({
+      id: idSeq++,
+      spec: spec,
+      x: x!=null ? x : rand(spec.maxR+10, W-spec.maxR-10),
+      y: y!=null ? y : rand(spec.maxR+10, H-spec.maxR-10),
+      vx: rand(-0.4,0.4),
+      vy: rand(-0.4,0.4),
+      r: radius!=null ? radius : spec.baseR,
+      energy: energy!=null ? energy : spec.startEnergy,
+      cooldown: rand(0,30),
+      wobble: rand(0, Math.PI*2),
+      membrane: makeMembrane(spec),
+      nucleusAngle: rand(0,6.28),
+      nucleusDrift: rand(0.01,0.025),
+      nucleusDist: rand(0.18,0.32),
+      vacuoleAngle: rand(0,6.28),
+      vacuoleDrift: rand(-0.02,-0.008),
+      vacuoleDist: rand(0.32,0.44),
+      wanderAngle: rand(0, Math.PI*2),
+      wanderTimer: rand(0,60),
+      zoomieTimer: 0,
+      zoomieMult: 1,
+      splitFlash: 0,
+      splitAxis: 0,
+      mode: 'wander'
+    });
+  }
+
+  function spawnFood(x, y, value){
+    food.push({
+      x:x, y:y,
+      vy: rand(0.05,0.15),
+      phase: rand(0,6.28),
+      value: value || rand(16,22),
+      r: rand(2.2,3.4),
+      age: 0,
+      hatchAt: rand(650,950)
+    });
+  }
+
+  function resetWorld(){
+    creatures = [];
+    food = [];
+    idSeq = 1;
+    assignFlavor();
+    SPECIES.forEach(function(spec){
+      rollSpecies(spec);
+      for (var i=0;i<spec.count;i++) spawnCreature(spec);
+    });
+    for (var i=0;i<10;i++) spawnFood(rand(30,W-30), rand(30,H-30));
+    tickCount = 0;
+    deselectCreature();
+    buildLegend();
+  }
+
+  // --- simulation stepping ---
+  var tickCount = 0;
+  var foodSpawnAccum = 0;
+  var STEP_MS = 1000/30;
+  // hard ceiling: keeps the neighbor-scanning sim (and the canvas) fast, and
+  // stops any one strain's population from running away unbounded
+  var MAX_CREATURES = 400;
+
+  function creatureSpeedMult(c){
+    return c.zoomieTimer > 0 ? c.zoomieMult : 1;
+  }
+
+  function nearestFood(c){
+    var best=null, bestD=c.spec.visionR*c.spec.visionR;
+    for (var i=0;i<food.length;i++){
+      var f=food[i];
+      var d=dist2(c.x,c.y,f.x,f.y);
+      if (d<bestD){ bestD=d; best=f; }
+    }
+    return best;
+  }
+
+  function nearestPrey(c){
+    var best=null, bestD=c.spec.visionR*c.spec.visionR;
+    for (var i=0;i<creatures.length;i++){
+      var o=creatures[i];
+      if (o===c || o.spec.key===c.spec.key) continue;
+      if (c.r < o.r*c.spec.predatorRatio) continue;
+      var d=dist2(c.x,c.y,o.x,o.y);
+      if (d<bestD){ bestD=d; best=o; }
+    }
+    return best;
+  }
+
+  // danger gets noticed further out than food does — a creature that only
+  // spotted a predator at arm's length would never have time to react
+  function nearestThreat(c){
+    var best=null, bestD=(c.spec.visionR*1.2)*(c.spec.visionR*1.2);
+    for (var i=0;i<creatures.length;i++){
+      var o=creatures[i];
+      if (o===c || o.spec.key===c.spec.key) continue;
+      if (o.r < c.r*o.spec.predatorRatio) continue;
+      var d=dist2(c.x,c.y,o.x,o.y);
+      if (d<bestD){ bestD=d; best=o; }
+    }
+    return best;
+  }
+
+  function steerToward(c, tx, ty, mult){
+    var dx=tx-c.x, dy=ty-c.y;
+    var len=Math.sqrt(dx*dx+dy*dy)||1;
+    var sp = c.spec.speed*creatureSpeedMult(c)*(mult||1);
+    c.vx = c.vx*0.8 + (dx/len)*sp*0.2*4;
+    c.vy = c.vy*0.8 + (dy/len)*sp*0.2*4;
+  }
+
+  function clampSpeed(c, mult){
+    var sp = c.spec.speed*creatureSpeedMult(c)*(mult||1);
+    var m = Math.sqrt(c.vx*c.vx+c.vy*c.vy);
+    if (m > sp){ c.vx = c.vx/m*sp; c.vy = c.vy/m*sp; }
+  }
+
+  var FLEE_MULT = 1.85;
+  var SPLIT_FLASH_DURATION = 26;
+
+  // fleeing snaps straight to full bolting speed instead of easing in like
+  // normal steering does — a creature that noticed a predator shouldn't keep
+  // drifting toward it for a few more ticks while it slowly turns around
+  function fleeSteer(c, threat){
+    var dx = c.x-threat.x, dy = c.y-threat.y;
+    var len = Math.sqrt(dx*dx+dy*dy) || 1;
+    var sp = c.spec.speed*creatureSpeedMult(c)*FLEE_MULT;
+    c.vx = (dx/len)*sp;
+    c.vy = (dy/len)*sp;
+  }
+
+  // continuous cruising: holds a heading for a while, turns gradually, and
+  // steers back toward open water near the walls instead of hugging them
+  function wanderSteer(c, mult){
+    c.wanderTimer -= 1;
+    var nearEdge = c.x<34 || c.x>W-34 || c.y<34 || c.y>H-34;
+    if (c.wanderTimer <= 0 || nearEdge){
+      if (nearEdge){
+        c.wanderAngle = Math.atan2(H/2-c.y, W/2-c.x) + rand(-0.6,0.6);
+      } else {
+        c.wanderAngle += rand(-1.4,1.4);
+      }
+      c.wanderTimer = rand(35,85);
+    }
+    steerToward(c, c.x+Math.cos(c.wanderAngle)*60, c.y+Math.sin(c.wanderAngle)*60, mult);
+  }
+
+  function stepLogic(){
+    tickCount++;
+
+    // plankton spawn (steady trickle, scaled up as the tank fills so a
+    // growing population never runs into a hard food ceiling)
+    foodSpawnAccum += 1;
+    if (foodSpawnAccum > 40){
+      foodSpawnAccum = 0;
+      var batch = 1 + Math.min(6, Math.floor(creatures.length/15));
+      for (var sfi=0; sfi<batch; sfi++) spawnFood(rand(30,W-30), rand(10,40));
+      if (Math.random()<0.4) spawnFood(rand(30,W-30), rand(10,40));
+    }
+
+    var toRemoveCreatures = [];
+    var toRemoveFood = [];
+    var toHatch = [];
+
+    for (var fi=0; fi<food.length; fi++){
+      var fo = food[fi];
+      fo.phase += 0.05;
+      fo.y += fo.vy;
+      fo.x += Math.sin(fo.phase)*0.15;
+      if (fo.y > H-6) fo.y = H-6;
+      fo.age += 1;
+      if (fo.age >= fo.hatchAt) toHatch.push(fo);
+    }
+    if (toHatch.length){
+      food = food.filter(function(f){ return toHatch.indexOf(f)===-1; });
+      toHatch.forEach(function(f){
+        if (creatures.length >= MAX_CREATURES) return;
+        var spec = SPECIES[Math.floor(rand(0,SPECIES.length))];
+        spawnCreature(spec, f.x, f.y, spec.startEnergy*0.55, spec.baseR);
+        Sound.hatch();
+      });
+    }
+
+    for (var i=0;i<creatures.length;i++){
+      var c = creatures[i];
+      var spec = c.spec;
+
+      c.energy -= spec.metabolism * (0.6 + c.r/spec.maxR*0.8);
+      c.cooldown -= 1;
+      c.wobble += 0.15;
+
+      // an occasional unprompted burst of speed for no reason at all — a
+      // real zoomie, not a reaction to food, a threat, or a mate
+      if (c.splitFlash > 0) c.splitFlash--;
+
+      if (c.zoomieTimer > 0){
+        c.zoomieTimer--;
+      } else if (Math.random() < 0.0022){
+        c.zoomieTimer = Math.round(rand(15,30));
+        c.zoomieMult = rand(1.5,2.2);
+        c.wanderAngle = rand(0, Math.PI*2);
+        c.wanderTimer = c.zoomieTimer;
+      }
+
+      if (c.energy <= 0){ toRemoveCreatures.push(c); continue; }
+
+      var threat = c.r < spec.predatorR*1.6 ? nearestThreat(c) : null;
+
+      if (threat && c.energy > spec.maxEnergy*0.15){
+        fleeSteer(c, threat);
+        c.mode = 'flee';
+      } else if (c.r >= spec.predatorR && c.energy < spec.maxEnergy*spec.hungryFrac && nearestPrey(c)){
+        c.energy -= spec.metabolism*0.8; // the chase itself costs energy, win or lose
+        var prey = nearestPrey(c);
+        var d2 = dist2(c.x,c.y,prey.x,prey.y);
+        if (d2 < (c.r+prey.r)*(c.r+prey.r)){
+          toRemoveCreatures.push(prey);
+          c.energy = Math.min(spec.maxEnergy, c.energy + prey.r*3.2);
+          c.r = Math.min(spec.maxR, c.r + prey.r*0.18);
+          Sound.predation();
+        } else {
+          steerToward(c, prey.x, prey.y, 1.15);
+        }
+        c.mode = 'hunt';
+      } else if (c.energy < spec.maxEnergy*0.75){
+        var f = nearestFood(c);
+        if (f){
+          var fd2 = dist2(c.x,c.y,f.x,f.y);
+          if (fd2 < (c.r+f.r+2)*(c.r+f.r+2)){
+            toRemoveFood.push(f);
+            c.energy = Math.min(spec.maxEnergy, c.energy + f.value);
+            c.r = Math.min(spec.maxR, c.r + spec.growthPerFood);
+            Sound.eat();
+          } else {
+            steerToward(c, f.x, f.y, 1);
+          }
+          c.mode = 'forage';
+        } else {
+          wanderSteer(c, 0.85);
+          c.mode = 'wander';
+        }
+      } else {
+        wanderSteer(c, 0.7);
+        c.mode = 'wander';
+      }
+
+      clampSpeed(c, threat ? FLEE_MULT : (c.mode==='hunt' ? 1.15 : 1));
+      c.x += c.vx;
+      c.y += c.vy;
+
+      var heading = Math.atan2(c.vy, c.vx) + Math.PI/2;
+      var wiggle = Math.sin(c.wobble*1.8) * spec.speed * 0.18;
+      c.x += Math.cos(heading)*wiggle;
+      c.y += Math.sin(heading)*wiggle;
+
+      if (c.x < c.r){ c.x=c.r; c.vx=Math.abs(c.vx); }
+      if (c.x > W-c.r){ c.x=W-c.r; c.vx=-Math.abs(c.vx); }
+      if (c.y < c.r){ c.y=c.r; c.vy=Math.abs(c.vy); }
+      if (c.y > H-c.r){ c.y=H-c.r; c.vy=-Math.abs(c.vy); }
+
+      if (c.energy >= spec.reproCost*1.05 && c.cooldown<=0 && creatures.length < MAX_CREATURES){
+        // mitosis: the cell itself becomes one daughter, and spawns the other —
+        // both split the parent's size and energy rather than one staying put
+        // and budding off a tiny newcomer. any size can split, not just fully
+        // grown adults, so the tank doesn't skew toward a wall of max-size cells
+        var splitAngle = rand(0, Math.PI*2);
+        var sx = Math.cos(splitAngle), sy = Math.sin(splitAngle);
+        var daughterR = Math.max(spec.baseR, c.r/Math.SQRT2);
+        var daughterEnergy = Math.max(spec.startEnergy*0.4, (c.energy-spec.reproCost)/2);
+        var kick = spec.speed*1.6;
+        var origX = c.x, origY = c.y;
+
+        c.r = daughterR;
+        c.energy = daughterEnergy;
+        c.cooldown = spec.reproCooldown;
+        c.x = origX + sx*daughterR*0.9;
+        c.y = origY + sy*daughterR*0.9;
+        c.vx = sx*kick; c.vy = sy*kick;
+        c.splitFlash = SPLIT_FLASH_DURATION;
+        c.splitAxis = splitAngle;
+
+        spawnCreature(spec, origX - sx*daughterR*0.9, origY - sy*daughterR*0.9, daughterEnergy, daughterR);
+        var sibling = creatures[creatures.length-1];
+        sibling.vx = -sx*kick; sibling.vy = -sy*kick;
+        sibling.cooldown = spec.reproCooldown;
+        sibling.splitFlash = SPLIT_FLASH_DURATION;
+        sibling.splitAxis = splitAngle;
+        Sound.split();
+      }
+    }
+
+    if (toRemoveCreatures.length){
+      creatures = creatures.filter(function(c){ return toRemoveCreatures.indexOf(c)===-1; });
+    }
+    if (toRemoveFood.length){
+      food = food.filter(function(f){ return toRemoveFood.indexOf(f)===-1; });
+    }
+  }
+
+  // --- rendering ---
+  var ambientPhase = 0;
+
+  function blobPoints(c, r, g){
+    var pts = 18;
+    var arr = [];
+    // membrane texture reads as smoother in juveniles, more sculpted in adults
+    var texture = 0.6 + 0.55*g;
+    var stretch = c.spec.visual==='streak' ? 1.22 + g*0.35 : 1;
+    var heading = Math.atan2(c.vy, c.vx);
+    var ch = Math.cos(heading), sh = Math.sin(heading);
+
+    // a cell fresh out of a split still looks like it's mid-pinch: elongated
+    // along the axis it separated on, easing back to round as the flash fades
+    var splitStretch = 1, sax = 0, say = 0;
+    if (c.splitFlash > 0){
+      splitStretch = 1 + (c.splitFlash/SPLIT_FLASH_DURATION)*0.6;
+      sax = Math.cos(c.splitAxis); say = Math.sin(c.splitAxis);
+    }
+
+    for (var i=0;i<pts;i++){
+      var theta = (i/pts)*Math.PI*2;
+      var rad = r;
+      for (var m=0;m<c.membrane.length;m++){
+        var mm = c.membrane[m];
+        rad += r*mm.a*texture*Math.sin(theta*mm.f + c.wobble*0.6 + mm.p);
+      }
+      var lx = Math.cos(theta)*rad, ly = Math.sin(theta)*rad;
+      if (stretch !== 1){
+        var along = lx*ch + ly*sh, perp = -lx*sh + ly*ch;
+        along *= stretch;
+        lx = along*ch - perp*sh;
+        ly = along*sh + perp*ch;
+      }
+      if (splitStretch !== 1){
+        var along2 = lx*sax + ly*say, perp2 = -lx*say + ly*sax;
+        along2 *= splitStretch;
+        lx = along2*sax - perp2*say;
+        ly = along2*say + perp2*sax;
+      }
+      arr.push(c.x+lx, c.y+ly);
+    }
+    return arr;
+  }
+
+  function tracePath(pts){
+    var n = pts.length/2;
+    var mx = (pts[0]+pts[(n-1)*2])/2, my = (pts[1]+pts[(n-1)*2+1])/2;
+    ctx.beginPath();
+    ctx.moveTo(mx, my);
+    for (var i=0;i<n;i++){
+      var cx=pts[i*2], cy=pts[i*2+1];
+      var j=(i+1)%n;
+      var nxx=pts[j*2], nyy=pts[j*2+1];
+      ctx.quadraticCurveTo(cx, cy, (cx+nxx)/2, (cy+nyy)/2);
+    }
+    ctx.closePath();
+  }
+
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    ambientPhase += 0.004;
+
+    // slow caustic light shafts drifting through the water
+    ctx.save();
+    var glow = getComputedStyle(document.documentElement).getPropertyValue('--glow').trim();
+    ctx.globalAlpha = 1;
+    for (var i=0;i<4;i++){
+      var bx = ((i*0.27 + Math.sin(ambientPhase + i*1.7)*0.06 + 1) % 1) * W;
+      var shaft = ctx.createLinearGradient(bx-46,0,bx+46,H);
+      shaft.addColorStop(0, 'rgba(0,0,0,0)');
+      shaft.addColorStop(0.5, glow);
+      shaft.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = shaft;
+      ctx.globalAlpha = 0.35;
+      ctx.beginPath();
+      ctx.moveTo(bx-50,0);
+      ctx.lineTo(bx+50,0);
+      ctx.lineTo(bx+80,H);
+      ctx.lineTo(bx-80,H);
+      ctx.closePath();
+      ctx.fill();
+    }
+    ctx.restore();
+
+    var foodColor = getComputedStyle(document.documentElement).getPropertyValue('--food').trim();
+    var foodGlow = getComputedStyle(document.documentElement).getPropertyValue('--food-glow').trim();
+    for (var i=0;i<food.length;i++){
+      var f = food[i];
+      var ripeness = Math.min(1, f.age/f.hatchAt);
+      var tw = 0.7 + Math.sin(f.phase*(1.3+ripeness*3.2))*(0.25+ripeness*0.35);
+      ctx.beginPath();
+      ctx.fillStyle = foodGlow;
+      ctx.arc(f.x, f.y, (f.r+2.5)*(1+ripeness*0.9)*tw, 0, Math.PI*2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.fillStyle = foodColor;
+      ctx.arc(f.x, f.y, f.r, 0, Math.PI*2);
+      ctx.fill();
+    }
+
+    for (var i=0;i<creatures.length;i++){
+      var c = creatures[i];
+      var r = c.r;
+      var spec = c.spec;
+      var g = Math.max(0, Math.min(1, (r-spec.baseR)/(spec.maxR-spec.baseR)));
+      var matured = r >= spec.matureR;
+      var heading = Math.atan2(c.vy, c.vx);
+      var speedMag = Math.sqrt(c.vx*c.vx+c.vy*c.vy);
+
+      // trailing flourishes drawn first so the body overlaps their base
+      if (spec.visual==='tail'){
+        var tailLen = r*(1.15+g*0.7);
+        var tx0 = c.x - Math.cos(heading)*r*0.85, ty0 = c.y - Math.sin(heading)*r*0.85;
+        var perpAng = heading+Math.PI/2;
+        var wave = Math.sin(c.wobble*2.4)*r*0.4;
+        var midx = tx0 - Math.cos(heading)*tailLen*0.5 + Math.cos(perpAng)*wave;
+        var midy = ty0 - Math.sin(heading)*tailLen*0.5 + Math.sin(perpAng)*wave;
+        var endx = tx0 - Math.cos(heading)*tailLen, endy = ty0 - Math.sin(heading)*tailLen;
+        ctx.beginPath();
+        ctx.moveTo(tx0,ty0);
+        ctx.quadraticCurveTo(midx,midy,endx,endy);
+        ctx.strokeStyle = shadeColor(spec.color, 15);
+        ctx.globalAlpha = 0.5;
+        ctx.lineWidth = Math.max(0.8, r*0.13);
+        ctx.stroke();
+        ctx.globalAlpha = 1;
+      } else if (spec.visual==='streak'){
+        var trailLen = r*1.6*Math.min(1.4, speedMag/spec.speed);
+        var trx = c.x - Math.cos(heading)*trailLen, trY = c.y - Math.sin(heading)*trailLen;
+        var trailGrad = ctx.createLinearGradient(c.x,c.y,trx,trY);
+        trailGrad.addColorStop(0, shadeColor(spec.color, 20));
+        trailGrad.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.beginPath();
+        ctx.moveTo(c.x,c.y);
+        ctx.lineTo(trx,trY);
+        ctx.strokeStyle = trailGrad;
+        ctx.globalAlpha = 0.5;
+        ctx.lineWidth = Math.max(1, r*0.45);
+        ctx.stroke();
+        ctx.globalAlpha = 1;
+      }
+
+      var pts = blobPoints(c, r, g);
+
+      ctx.save();
+      ctx.shadowColor = c.spec.color;
+      ctx.shadowBlur = r*0.9;
+      tracePath(pts);
+      var grad = ctx.createRadialGradient(c.x-r*0.35, c.y-r*0.4, r*0.1, c.x, c.y, r*1.05);
+      grad.addColorStop(0, shadeColor(c.spec.color, 40+g*20));
+      grad.addColorStop(0.55, c.spec.color);
+      grad.addColorStop(1, shadeColor(c.spec.color, -10-g*10));
+      ctx.globalAlpha = 0.6 + g*0.26;
+      ctx.fillStyle = grad;
+      ctx.fill();
+      ctx.restore();
+
+      tracePath(pts);
+      ctx.globalAlpha = 1;
+      ctx.strokeStyle = shadeColor(c.spec.color, 40);
+      ctx.lineWidth = Math.max(0.8, r*0.06);
+      ctx.stroke();
+
+      // the spiked-visual strain roughens into a craggy hide once big enough to hunt
+      if (spec.visual==='spiked'){
+        var spikeCount = Math.round(4+g*7);
+        var spikeLen = r*(0.11+0.24*g);
+        ctx.fillStyle = shadeColor(spec.color, -12);
+        ctx.globalAlpha = 0.9;
+        for (var s=0;s<spikeCount;s++){
+          var sAng = (s/spikeCount)*Math.PI*2 + c.wobble*0.08;
+          var b1x = c.x+Math.cos(sAng-0.07)*r*0.97, b1y = c.y+Math.sin(sAng-0.07)*r*0.97;
+          var b2x = c.x+Math.cos(sAng+0.07)*r*0.97, b2y = c.y+Math.sin(sAng+0.07)*r*0.97;
+          var tpx = c.x+Math.cos(sAng)*(r+spikeLen), tpy = c.y+Math.sin(sAng)*(r+spikeLen);
+          ctx.beginPath();
+          ctx.moveTo(b1x,b1y);
+          ctx.lineTo(tpx,tpy);
+          ctx.lineTo(b2x,b2y);
+          ctx.closePath();
+          ctx.fill();
+        }
+        ctx.globalAlpha = 1;
+      }
+
+      // maturity halo: only breeding/hunting-capable adults carry this ring
+      if (matured){
+        ctx.beginPath();
+        ctx.arc(c.x, c.y, r*1.18, 0, Math.PI*2);
+        ctx.strokeStyle = shadeColor(spec.color, 65);
+        ctx.globalAlpha = 0.3 + Math.sin(c.wobble*0.5)*0.08;
+        ctx.lineWidth = Math.max(1, r*0.045);
+        ctx.stroke();
+        ctx.globalAlpha = 1;
+      }
+
+      // mode cues: a hunt glints a warning rim, a flee flashes pale
+      if (c.mode==='hunt'){
+        ctx.beginPath();
+        ctx.arc(c.x, c.y, r*1.08, 0, Math.PI*2);
+        ctx.strokeStyle = 'rgba(216,64,42,0.4)';
+        ctx.lineWidth = Math.max(1, r*0.08);
+        ctx.stroke();
+      } else if (c.mode==='flee'){
+        var flash = 0.2 + Math.abs(Math.sin(c.wobble*3))*0.25;
+        ctx.beginPath();
+        ctx.arc(c.x, c.y, r*1.08, 0, Math.PI*2);
+        ctx.strokeStyle = 'rgba(255,255,255,'+flash.toFixed(2)+')';
+        ctx.lineWidth = Math.max(1, r*0.06);
+        ctx.stroke();
+      }
+
+      // a playful ring for an unprompted burst of speed, independent of mode
+      if (c.zoomieTimer > 0){
+        ctx.beginPath();
+        ctx.arc(c.x, c.y, r*1.16, 0, Math.PI*2);
+        ctx.strokeStyle = 'rgba(255,255,255,0.32)';
+        ctx.lineWidth = Math.max(1, r*0.05);
+        ctx.stroke();
+      }
+
+      // a bright ring that expands and fades right after a cell divides
+      if (c.splitFlash > 0){
+        var flashT = c.splitFlash/SPLIT_FLASH_DURATION;
+        // a hot white shockwave that expands and fades, plus a tight bright
+        // rim right on the membrane — unmistakably "something just happened"
+        ctx.beginPath();
+        ctx.arc(c.x, c.y, r*(1.05 + (1-flashT)*1.9), 0, Math.PI*2);
+        ctx.strokeStyle = 'rgba(255,255,255,'+(flashT*0.8).toFixed(2)+')';
+        ctx.lineWidth = Math.max(1, r*0.11*flashT);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(c.x, c.y, r*1.04, 0, Math.PI*2);
+        ctx.strokeStyle = 'rgba(255,255,255,'+(flashT*0.55).toFixed(2)+')';
+        ctx.lineWidth = Math.max(1, r*0.16);
+        ctx.stroke();
+      }
+
+      // a steady marker ring for whichever cell is pinned in the inspector
+      if (c.id === selectedId){
+        ctx.beginPath();
+        ctx.arc(c.x, c.y, r*1.3, 0, Math.PI*2);
+        ctx.strokeStyle = 'rgba(255,255,255,0.85)';
+        ctx.setLineDash([r*0.22, r*0.16]);
+        ctx.lineDashOffset = -c.wobble*4;
+        ctx.lineWidth = Math.max(1.2, r*0.07);
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
+
+      c.nucleusAngle += c.nucleusDrift;
+      var nx = c.x + Math.cos(c.nucleusAngle)*r*c.nucleusDist;
+      var ny = c.y + Math.sin(c.nucleusAngle)*r*c.nucleusDist;
+      var nr = Math.max(1.4, r*0.28);
+      var nGrad = ctx.createRadialGradient(nx-nr*0.3, ny-nr*0.3, nr*0.1, nx, ny, nr);
+      nGrad.addColorStop(0, shadeColor(c.spec.color, -15));
+      nGrad.addColorStop(1, shadeColor(c.spec.color, -55));
+      ctx.beginPath();
+      ctx.fillStyle = nGrad;
+      ctx.globalAlpha = 0.85;
+      ctx.arc(nx, ny, nr, 0, Math.PI*2);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+
+      // a second organelle only shows once a cell is well on its way to maturity
+      if (g > 0.42){
+        c.vacuoleAngle += c.vacuoleDrift;
+        var vx = c.x + Math.cos(c.vacuoleAngle)*r*c.vacuoleDist;
+        var vy = c.y + Math.sin(c.vacuoleAngle)*r*c.vacuoleDist;
+        var vr = Math.max(1, r*0.16);
+        ctx.beginPath();
+        ctx.fillStyle = shadeColor(c.spec.color, 30);
+        ctx.globalAlpha = 0.5;
+        ctx.arc(vx, vy, vr, 0, Math.PI*2);
+        ctx.fill();
+        ctx.globalAlpha = 1;
+      }
+
+      ctx.beginPath();
+      ctx.fillStyle = 'rgba(255,255,255,0.35)';
+      ctx.arc(c.x-r*0.32, c.y-r*0.38, Math.max(0.8,r*0.16), 0, Math.PI*2);
+      ctx.fill();
+    }
+  }
+
+  function shadeColor(hex, amt){
+    var num = parseInt(hex.replace('#',''),16);
+    var r = Math.min(255,Math.max(0,(num>>16)+amt));
+    var g = Math.min(255,Math.max(0,((num>>8)&0xff)+amt));
+    var b = Math.min(255,Math.max(0,(num&0xff)+amt));
+    return 'rgb('+r+','+g+','+b+')';
+  }
+
+  // --- UI ---
+  var legendEl = document.getElementById('legend');
+  var cycleEl = document.getElementById('cycleReadout');
+  var popEl = document.getElementById('popReadout');
+  var endOverlay = document.getElementById('endOverlay');
+  var endEyebrow = document.getElementById('endEyebrow');
+  var endHeadline = document.getElementById('endHeadline');
+  var endBody = document.getElementById('endBody');
+  var endExtinctList = document.getElementById('endExtinctList');
+  var endHistoryEyebrow = document.getElementById('endHistoryEyebrow');
+  var endHistoryList = document.getElementById('endHistoryList');
+  var gameOver = false;
+
+  // --- creature inspector ---
+  var selectedId = null;
+  var inspectorEl = document.getElementById('inspector');
+  var inspSwatch = document.getElementById('inspSwatch');
+  var inspNameEl = document.getElementById('inspName');
+  var inspPerkEl = document.getElementById('inspPerk');
+  var inspModeEl = document.getElementById('inspMode');
+  var inspEnergyText = document.getElementById('inspEnergyText');
+  var inspEnergyBar = document.getElementById('inspEnergyBar');
+  var inspSizeText = document.getElementById('inspSizeText');
+  var inspSizeBar = document.getElementById('inspSizeBar');
+
+  function findCreatureAt(x, y){
+    var best = null, bestD = Infinity;
+    for (var i=0;i<creatures.length;i++){
+      var c = creatures[i];
+      var d = dist2(x,y,c.x,c.y);
+      if (d <= c.r*c.r && d < bestD){ bestD = d; best = c; }
+    }
+    return best;
+  }
+
+  function selectCreature(c){
+    selectedId = c.id;
+    inspSwatch.style.background = c.spec.color;
+    inspSizeBar.style.background = c.spec.color;
+    inspNameEl.textContent = c.spec.name;
+    inspPerkEl.textContent = c.spec.perkName;
+    inspectorEl.hidden = false;
+  }
+
+  function deselectCreature(){
+    selectedId = null;
+    if (inspectorEl) inspectorEl.hidden = true;
+  }
+
+  function updateInspector(){
+    if (selectedId == null) return;
+    var c = null;
+    for (var i=0;i<creatures.length;i++){ if (creatures[i].id === selectedId){ c = creatures[i]; break; } }
+    if (!c){ deselectCreature(); return; }
+    inspModeEl.textContent = c.mode;
+    var ePct = Math.round(c.energy/c.spec.maxEnergy*100);
+    inspEnergyText.textContent = Math.round(c.energy)+' / '+Math.round(c.spec.maxEnergy);
+    inspEnergyBar.style.width = Math.max(0,Math.min(100,ePct))+'%';
+    var sPct = Math.round(c.r/c.spec.maxR*100);
+    inspSizeText.textContent = sPct+'%';
+    inspSizeBar.style.width = Math.max(0,Math.min(100,sPct))+'%';
+  }
+
+  function triggerGameOver(survivorSpec){
+    gameOver = true;
+    running = false;
+    Sound.gameOver(!!survivorSpec);
+    var cycle = Math.floor(tickCount/30);
+    endEyebrow.textContent = 'cycle ' + cycle;
+
+    var extinct = SPECIES.filter(function(s){ return s !== survivorSpec; });
+    if (survivorSpec){
+      endHeadline.textContent = 'The ' + survivorSpec.name + ' inherit the tank';
+      endBody.textContent = 'They filled every space the water had to offer. Nothing else made it this far.';
+    } else {
+      endHeadline.textContent = 'The tank fell silent';
+      endBody.textContent = 'Every strain died out before any could take hold.';
+      extinct = SPECIES.slice();
+    }
+
+    endExtinctList.innerHTML = extinct.map(function(s){
+      return '<span class="end-chip"><span class="dot" style="background:'+s.color+'"></span>'+s.name+' &middot; extinct</span>';
+    }).join('');
+
+    History.record(survivorSpec ? survivorSpec.key : null, cycle);
+    var summary = History.summary();
+    endHistoryEyebrow.textContent = 'tank #' + summary.total + ' ' + String.fromCharCode(183) + ' track record';
+    var rows = SPECIES.map(function(s){
+      return { label: s.roleLabel, n: summary.tallies[s.key] };
+    });
+    rows.push({ label: 'No survivors', n: summary.wipeouts });
+    var maxN = Math.max(1, rows.reduce(function(m,r){ return Math.max(m,r.n); }, 0));
+    endHistoryList.innerHTML = rows.map(function(r){
+      var pct = Math.round(r.n/maxN*100);
+      return '<div class="hist-row"><span class="hist-label">'+r.label+'</span>' +
+        '<span class="hist-bar"><i style="width:'+pct+'%"></i></span>' +
+        '<span class="hist-count">'+r.n+'</span></div>';
+    }).join('');
+
+    endOverlay.hidden = false;
+  }
+
+  function checkGameOver(aliveKeys){
+    if (gameOver) return;
+    if (creatures.length === 0){
+      triggerGameOver(null);
+    } else if (aliveKeys.length === 1 && creatures.length >= MAX_CREATURES){
+      var survivor = SPECIES.filter(function(s){ return s.key===aliveKeys[0]; })[0];
+      triggerGameOver(survivor);
+    }
+  }
+
+  function buildLegend(){
+    legendEl.innerHTML = '';
+    SPECIES.forEach(function(spec){
+      var card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML =
+        '<div class="card-top">' +
+          '<span class="swatch" style="background:'+spec.color+'"></span>' +
+          '<span class="card-name-wrap">' +
+            '<span class="card-name">'+spec.name+'</span>' +
+            '<span class="card-perk">'+spec.perkName+'</span>' +
+          '</span>' +
+          '<span class="card-status" data-status="'+spec.key+'">--</span>' +
+        '</div>' +
+        '<div class="card-row"><span>alive</span><b data-count="'+spec.key+'">0</b></div>' +
+        '<div class="card-row"><span>avg. size</span><b data-size="'+spec.key+'">--</b></div>' +
+        '<div class="gauge"><i data-gauge="'+spec.key+'" style="background:'+spec.color+'"></i></div>';
+      legendEl.appendChild(card);
+    });
+  }
+
+  function updateLegend(){
+    var total = creatures.length;
+    popEl.textContent = total;
+    cycleEl.textContent = Math.floor(tickCount/30);
+    var aliveKeys = [];
+
+    SPECIES.forEach(function(spec){
+      var list = creatures.filter(function(c){ return c.spec.key===spec.key; });
+      var n = list.length;
+      if (n>0) aliveKeys.push(spec.key);
+      var avgR = n ? list.reduce(function(a,c){return a+c.r;},0)/n : 0;
+      var pct = Math.round(avgR/spec.maxR*100);
+
+      document.querySelector('[data-count="'+spec.key+'"]').textContent = n;
+      document.querySelector('[data-size="'+spec.key+'"]').textContent = n ? pct+'%' : '--';
+      document.querySelector('[data-gauge="'+spec.key+'"]').style.width = pct+'%';
+
+      var statusEl = document.querySelector('[data-status="'+spec.key+'"]');
+      var label;
+      if (n===0) label='extinct';
+      else if (n===1) label='critical';
+      else if (n<=3) label='dwindling';
+      else if (n>=spec.count*2) label='thriving';
+      else label='steady';
+      statusEl.textContent = label;
+    });
+
+    checkGameOver(aliveKeys);
+  }
+
+  // --- loop control ---
+  var running = true;
+  var speedMult = 1;
+  var lastTime = null;
+  var accumulator = 0;
+
+  function loop(ts){
+    requestAnimationFrame(loop);
+    if (!running) return;
+    if (lastTime==null) lastTime = ts;
+    var dt = ts - lastTime;
+    lastTime = ts;
+    if (dt > 250) dt = 250;
+    accumulator += dt*speedMult;
+    var steps = 0;
+    while (accumulator >= STEP_MS && steps < 8){
+      stepLogic();
+      accumulator -= STEP_MS;
+      steps++;
+    }
+    draw();
+    updateLegend();
+    updateInspector();
+  }
+
+  var playBtn = document.getElementById('playBtn');
+  playBtn.addEventListener('click', function(){
+    running = !running;
+    playBtn.textContent = running ? 'Pause' : 'Resume';
+    playBtn.setAttribute('aria-pressed', String(!running));
+    lastTime = null;
+  });
+
+  var speedButtons = document.querySelectorAll('.seg button');
+  speedButtons.forEach(function(btn){
+    btn.addEventListener('click', function(){
+      speedMult = parseFloat(btn.getAttribute('data-speed'));
+      speedButtons.forEach(function(b){ b.setAttribute('aria-pressed', String(b===btn)); });
+    });
+  });
+
+  function startNewTank(){
+    endOverlay.hidden = true;
+    gameOver = false;
+    if (!running){
+      running = true;
+      playBtn.textContent = 'Pause';
+      playBtn.setAttribute('aria-pressed', 'false');
+      lastTime = null;
+    }
+    resetWorld();
+  }
+
+  document.getElementById('resetBtn').addEventListener('click', startNewTank);
+  document.getElementById('endResetBtn').addEventListener('click', startNewTank);
+
+  canvas.addEventListener('click', function(e){
+    Sound.unlock();
+    var rect = canvas.getBoundingClientRect();
+    var scaleX = canvas.width/rect.width;
+    var scaleY = canvas.height/rect.height;
+    var x = (e.clientX-rect.left)*scaleX;
+    var y = (e.clientY-rect.top)*scaleY;
+
+    var hit = findCreatureAt(x, y);
+    if (hit){
+      selectCreature(hit);
+      return;
+    }
+
+    var n = Math.floor(rand(4,7));
+    for (var i=0;i<n;i++){
+      spawnFood(x+rand(-22,22), y+rand(-22,22), rand(16,22));
+    }
+  });
+
+  document.getElementById('inspectorClose').addEventListener('click', deselectCreature);
+
+  document.addEventListener('pointerdown', function(){ Sound.unlock(); }, {passive:true});
+
+  var soundBtn = document.getElementById('soundBtn');
+  soundBtn.setAttribute('aria-pressed', String(Sound.isEnabled()));
+  soundBtn.textContent = Sound.isEnabled() ? 'Sound on' : 'Sound off';
+  soundBtn.addEventListener('click', function(){
+    Sound.unlock();
+    Sound.setEnabled(!Sound.isEnabled());
+    soundBtn.setAttribute('aria-pressed', String(Sound.isEnabled()));
+    soundBtn.textContent = Sound.isEnabled() ? 'Sound on' : 'Sound off';
+  });
+
+  resetWorld();
+  requestAnimationFrame(loop);
+})();
+</script>
