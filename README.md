@@ -2,7 +2,7 @@
 
 A browser aquarium ecosystem simulation — a single self-contained HTML file, canvas-rendered, no build step and no external libraries.
 
-**Live demo:** https://claude.ai/code/artifact/a46e0126-9633-4a4b-b3d6-4e4043d5464a
+**Play it:** https://rstibal.github.io/tank-life/ (also published as a [Claude Artifact](https://claude.ai/code/artifact/a46e0126-9633-4a4b-b3d6-4e4043d5464a))
 
 ![Tank Life screenshot](screenshot.png)
 
