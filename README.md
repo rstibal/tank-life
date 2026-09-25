@@ -17,7 +17,7 @@ Each tank spawns 4 "strains" of cell-like creatures, one per fixed behavior role
 
 Every strain's numeric stats, name, color, and visual silhouette (tail / bulge / spiked hide / motion streak) are randomized independently each time a tank resets, so no two tanks look or play the same — only the underlying role identity stays stable across resets.
 
-Creatures drift around eating plankton to grow, reproduce via mitosis once they've stored enough energy (splitting in two at any size, not just at maturity), and larger creatures hunt smaller creatures of other strains. Plankton left uneaten too long hatches into a new creature. Population is capped (currently 400) purely for performance, since the simulation is O(n²) per tick.
+Creatures drift around eating plankton to grow, reproduce via mitosis once they've stored enough energy (splitting in two well before maturity, with size and energy shared between the daughters), and larger creatures hunt smaller creatures of other strains. Plankton left uneaten too long hatches into a new creature of a strain that is still alive — extinction is permanent, and the last strain standing wins the tank. Late in a tank the water slowly grows poorer, so every tank eventually has a winner. Population is capped (currently 400) purely for performance, since the simulation is O(n²) per tick.
 
 Other features:
 - Click a creature to open an inspector panel with its live stats
